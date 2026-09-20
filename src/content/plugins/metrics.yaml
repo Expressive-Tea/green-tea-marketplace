@@ -1,0 +1,4 @@
+npm: "@green-tea/metrics"
+jsr: "@green-tea/metrics"
+repo: https://github.com/Expressive-Tea/green-tea-plugins
+description: "Counts green-tea's lifecycle events and renders them in the Prometheus text format."

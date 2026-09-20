@@ -1,0 +1,327 @@
+/* Type and palette are green-tea-site's, self-hosted the same way, so the sites read as one
+   project rather than as three that happen to share a colour. */
+@font-face {
+  font-family: 'Zen Maru Gothic';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/plugins/fonts/zen-maru-gothic-latin-500.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Zen Maru Gothic';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/plugins/fonts/zen-maru-gothic-latin-700.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  --base: #0d1117;
+  --panel: #161b22;
+  --line: #21262d;
+  --matcha: #5fb88a;
+  --matcha-deep: #3fa873;
+  --violet: #7c6cf0;
+  --ink: #e6edf3;
+  --dim: #8b949e;
+
+  --font-heading: 'Zen Maru Gothic', var(--font-body);
+  --font-body:
+    -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+
+  --max-width: 1120px;
+  --gutter: 24px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--base);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+.wrap {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 64px var(--gutter) 96px;
+}
+
+header h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin: 0 0 12px;
+  letter-spacing: -0.01em;
+}
+
+header h1 em {
+  color: var(--matcha);
+  font-style: normal;
+}
+
+header p {
+  color: var(--dim);
+  max-width: 62ch;
+  margin: 0 0 16px;
+}
+
+header a {
+  color: var(--matcha);
+}
+
+/* The one thing a reader has to know before installing anything here. */
+.requires {
+  margin: 24px 0 0;
+  padding: 12px 16px;
+  border-left: 3px solid var(--violet);
+  background: rgba(124, 108, 240, 0.07);
+  color: var(--dim);
+  font-size: 0.9rem;
+}
+
+.requires code {
+  font-family: var(--font-mono);
+  color: var(--ink);
+}
+
+.grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  margin-top: 40px;
+}
+
+.card {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 22px 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card h2 {
+  margin: 0;
+  /* Room for the version pinned to the corner, so a long name wraps instead of running under it. */
+  padding-right: 104px;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.version {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(95, 184, 138, 0.12);
+  border: 1px solid rgba(95, 184, 138, 0.3);
+  color: var(--matcha);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Runs-on, directly under the title. Colour means it runs there; grey means it does not. */
+.runtimes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+}
+
+.runtimes li {
+  position: relative;
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  cursor: help;
+}
+
+.runtimes svg {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
+  /* The hover target is always the <li>. Without this the pointer lands on the mark instead and
+     the tooltip below never fires. */
+  pointer-events: none;
+}
+
+/* A real tooltip, not the native one: instant, styled, and it cannot be hijacked by anything
+   inside the icon. */
+.runtimes li::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 9px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  z-index: 2;
+  width: max-content;
+  max-width: 220px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: #0b0f14;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+/* The arrow. A rotated square is one element fewer than a border triangle and inherits the
+   tooltip's own border. */
+.runtimes li::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  z-index: 3;
+  width: 8px;
+  height: 8px;
+  background: #0b0f14;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transform: translateX(-50%) rotate(45deg) translateY(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.runtimes li:hover::after,
+.runtimes li:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.runtimes li:hover::before,
+.runtimes li:focus-visible::before {
+  opacity: 1;
+  transform: translateX(-50%) rotate(45deg) translateY(0);
+}
+
+.runtimes li:focus-visible {
+  outline: 2px solid var(--matcha);
+  outline-offset: 2px;
+}
+
+/* An unsupported mark is dimmed, but its tooltip has to stay readable — the opacity sits on the
+   list item, so lift it back on the tooltip. */
+.runtimes .no::after,
+.runtimes .no::before {
+  opacity: 0;
+}
+
+.runtimes .no:hover,
+.runtimes .no:focus-visible {
+  opacity: 1;
+}
+
+.runtimes .no:hover svg,
+.runtimes .no:focus-visible svg {
+  opacity: 0.45;
+}
+
+.runtimes .yes {
+  color: var(--matcha);
+  border-color: rgba(95, 184, 138, 0.35);
+  background: rgba(95, 184, 138, 0.09);
+}
+
+/* Dim grey, and only 45% opaque: unsupported should read as absent at a glance, not as a second
+   kind of support. */
+.runtimes .no {
+  color: #6e7681;
+  opacity: 0.45;
+}
+
+.card > p {
+  margin: 0;
+  color: var(--dim);
+  flex: 1;
+}
+
+.links {
+  margin: 4px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.links a {
+  color: var(--matcha);
+  text-decoration: none;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 11px;
+  font-size: 0.8rem;
+}
+
+.links a:hover {
+  border-color: var(--matcha-deep);
+}
+
+.why {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 0.78rem;
+}
+
+.why a {
+  color: var(--dim);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--line);
+}
+
+.why a:hover {
+  color: var(--matcha);
+}
+
+footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  color: var(--dim);
+  font-size: 0.85rem;
+}
+
+footer a {
+  color: var(--matcha);
+}
