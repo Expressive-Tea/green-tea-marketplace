@@ -60,31 +60,94 @@ h3 {
   font-weight: 700;
 }
 
+/* Horizontal only. The header and footer use `.wrap` too, so vertical rhythm belongs to each
+   section rather than to the container they share. */
 .wrap {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 64px var(--gutter) 96px;
+  padding-inline: var(--gutter);
 }
 
-header h1 {
-  font-size: clamp(2rem, 5vw, 3rem);
-  margin: 0 0 12px;
+main {
+  display: block;
+}
+
+.hero {
+  padding-top: clamp(3rem, 7vw, 5rem);
+}
+
+.hero h1 {
+  font-size: clamp(2.2rem, 6vw, 3.4rem);
+  margin: 0 0 16px;
   letter-spacing: -0.01em;
 }
 
-header h1 em {
-  color: var(--matcha);
-  font-style: normal;
-}
-
-header p {
+.hero__lead {
   color: var(--dim);
   max-width: 62ch;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.contribute {
+  padding-top: clamp(3rem, 7vw, 4.5rem);
+  max-width: min(var(--max-width), 760px);
+}
+
+.contribute h2 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
   margin: 0 0 16px;
 }
 
-header a {
+.contribute p {
+  color: var(--dim);
+  margin: 0 0 16px;
+}
+
+.contribute code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--ink);
+}
+
+.contribute pre {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 18px;
+  overflow-x: auto;
+  margin: 0 0 20px;
+}
+
+.contribute pre code {
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.contribute__cadence {
+  border-left: 3px solid var(--matcha);
+  padding-left: 14px;
+}
+
+.contribute__cadence strong {
   color: var(--matcha);
+}
+
+.button {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid rgba(95, 184, 138, 0.4);
+  background: rgba(95, 184, 138, 0.1);
+  color: var(--matcha);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.button:hover {
+  border-color: var(--matcha);
 }
 
 /* The one thing a reader has to know before installing anything here. */
@@ -106,7 +169,7 @@ header a {
   display: grid;
   gap: 20px;
   grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-  margin-top: 40px;
+  margin-top: clamp(2rem, 5vw, 3rem);
 }
 
 .card {
@@ -314,14 +377,3 @@ header a {
   color: var(--matcha);
 }
 
-footer {
-  margin-top: 64px;
-  padding-top: 24px;
-  border-top: 1px solid var(--line);
-  color: var(--dim);
-  font-size: 0.85rem;
-}
-
-footer a {
-  color: var(--matcha);
-}
