@@ -36,7 +36,7 @@ export function greeting(text = 'hello'): Plugin {
         <a class="button button--solid" href={ADD_URL}>Add your plugin</a>
         <a class="button button--ghost" href="#plugins">Browse plugins</a>
       </p>
-      <p class="hero__micro">Node · Deno · Bun · workerd</p>
+      <p class="hero__micro">Needs <code>@green-tea/core@26.9.0-beta.2</code> or newer. Each card shows which runtimes that plugin supports.</p>
     </div>
 
     <figure class="hero__code" aria-label="A complete plugin">
@@ -85,6 +85,11 @@ export function greeting(text = 'hello'): Plugin {
     color: var(--dim);
     font-size: 0.85rem;
     letter-spacing: 0.03em;
+  }
+
+  .hero__micro code {
+    font-family: var(--font-mono);
+    color: var(--ink);
   }
 
   .hero__code {

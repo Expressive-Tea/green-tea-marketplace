@@ -1,7 +1,8 @@
 ---
 // Every claim here is checked against core: the shape and the three-method API are
 // `Plugin`/`PluginApi` in src/plugin.ts, and `mountPlugin` hands over nothing else, which is why a
-// plugin cannot reorder or remove what an app already has.
+// plugin cannot reorder or remove the app's steps. That guarantee covers registration only: a
+// plugin's step still sees the live request context (see the comment in mountPlugin).
 const points = [
   {
     title: 'One object',
@@ -9,11 +10,11 @@ const points = [
   },
   {
     title: 'Core as types only',
-    body: 'Plugins import <code>@green-tea/core</code> with <code>import type</code>. Installing one never pulls in a second copy of core, so there is no version to line up.',
+    body: 'Plugins import <code>@green-tea/core</code> with <code>import type</code> and keep it out of <code>dependencies</code>, and review checks for it. So installing one does not pull in a second copy of core.',
   },
   {
     title: 'The graph picks the order',
-    body: 'Say what your plugin needs and what it provides, and green-tea decides where it runs. A plugin can add to an app, but it cannot reorder or remove anything that is already there.',
+    body: 'Say what your plugin needs and what it provides, and green-tea decides where it runs. A plugin can only add nodes to the graph. It has no way to reorder or remove the app&rsquo;s own steps.',
   },
 ];
 ---
