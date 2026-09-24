@@ -1,4 +1,3 @@
-npm: "@green-tea/rate-limit"
 jsr: "@green-tea/rate-limit"
 repo: https://github.com/Expressive-Tea/green-tea-plugins
 description: "A per-request rate limiter with a branded 429 and a swept in-memory store."

@@ -1,4 +1,3 @@
-npm: "@green-tea/jwt"
 jsr: "@green-tea/jwt"
 repo: https://github.com/Expressive-Tea/green-tea-plugins
 description: "Loads JWT signing keys at boot and publishes a sign/verify registry into the graph."

@@ -10,8 +10,8 @@ export const RUNTIMES = Object.freeze(['node', 'deno', 'bun', 'workerd']);
  *
  * In GitHub Actions a package that does not answer is a failure — that is the check, and it runs
  * against the live registries on every pull request and every push to main. Locally it is a
- * warning and the card renders from `preview.mjs`, because a site you cannot look at until its
- * packages ship is a site nobody can design.
+ * warning and the entry is left out, so the site can still be looked at while one package is
+ * broken — without rendering data nobody read from a registry.
  */
 export const STRICT = process.env.CI === 'true';
 
@@ -109,19 +109,19 @@ export function declaredRuntimes({ engines, runtimeCompat }) {
 }
 
 /**
- * Everything one card needs, live where possible.
+ * Everything one card needs, live.
  *
  * Under `CI` a registry that does not answer throws and fails the build, which is the rule that
- * stops a stale or half-empty listing reaching production. Off CI it falls back to `preview.mjs`
- * and says so, loudly, once per package.
+ * stops a stale or half-empty listing reaching production. Off CI it warns and returns `null`, and
+ * the caller leaves the entry out.
  */
-export async function readEntry(entry, preview) {
+export async function readEntry(entry) {
   try {
     const npm = entry.npm ? await readNpm(entry.npm) : undefined;
     const jsr = entry.jsr ? await readJsr(entry.jsr) : undefined;
 
     return {
-      version: (npm ?? jsr).newest,
+      version: (jsr ?? npm).newest,
       // npm's `engines` is the richer of the two — JSR's `runtimeCompat` is empty far more often,
       // including on `@green-tea/core` itself — so it wins when both exist.
       runtimes: declaredRuntimes({ engines: npm?.engines, runtimeCompat: jsr?.runtimeCompat }),
@@ -129,10 +129,8 @@ export async function readEntry(entry, preview) {
     };
   } catch (error) {
     if (STRICT) throw error;
-    const fallback = preview[entry.npm ?? entry.jsr];
-    if (!fallback) throw error;
-    console.warn(`  not published yet, rendering from preview data: ${entry.npm ?? entry.jsr}`);
+    console.warn(`  left out, registry did not answer: ${entry.jsr ?? entry.npm} (${error.message})`);
 
-    return { version: fallback.version, runtimes: declaredRuntimes({ engines: fallback.engines }), live: false };
+    return null;
   }
 }
