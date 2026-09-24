@@ -10,7 +10,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "node scripts/deploy.mjs --self-test",
+    "test": "node scripts/deploy.mjs --self-test && node --test scripts/registry.test.mjs",
     "deploy": "npm run build && node scripts/deploy.mjs",
     "astro": "astro"
   },

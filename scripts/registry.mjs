@@ -48,7 +48,36 @@ function compare(a, b) {
  * `@green-tea/core`, which has two published versions and `"latest": null`.
  */
 export function newestVersion(versions) {
-  return [...versions].sort(compare).pop();
+  return byNewest(versions)[0];
+}
+
+/** Versions sorted newest first. */
+export function byNewest(versions) {
+  return [...versions].sort(compare).reverse();
+}
+
+/**
+ * ESM only, with no CJS way in at all — dual packages included, because green-tea is ESM end to
+ * end and a `require` path is what breaks first when the Node floor moves.
+ */
+export function isEsmOnly({ type, main, exports }) {
+  if (type !== 'module') return false;
+  const cjs = (node, key) => {
+    if (key === 'require') return true;
+    if (typeof node === 'string') return node.endsWith('.cjs');
+    if (node && typeof node === 'object') return Object.entries(node).some(([k, v]) => cjs(v, k));
+
+    return false;
+  };
+
+  return !cjs(main) && !cjs(exports);
+}
+
+/** npm stores this literal string when a package ships no README. */
+export function npmReadme(packument) {
+  const readme = packument.readme ?? '';
+
+  return readme.startsWith('ERROR: No README data found') ? '' : readme;
 }
 
 async function getJson(url, what) {
@@ -76,6 +105,10 @@ export async function readNpm(name) {
     devDependencies: version.devDependencies ?? {},
     dependencies: version.dependencies ?? {},
     peerDependencies: version.peerDependencies ?? {},
+    type: version.type,
+    main: version.main,
+    exports: version.exports,
+    readme: npmReadme(packument),
   };
 }
 
@@ -118,6 +151,11 @@ export function declaredRuntimes({ engines, runtimeCompat }) {
 export async function readEntry(entry) {
   try {
     const npm = entry.npm ? await readNpm(entry.npm) : undefined;
+    if (npm && !isEsmOnly(npm)) {
+      throw new Error(
+        `npm ${entry.npm}@${npm.newest} is not ESM only (type: ${npm.type ?? 'unset'}, main: ${npm.main ?? '-'}, exports: ${JSON.stringify(npm.exports ?? null)})`,
+      );
+    }
     const jsr = entry.jsr ? await readJsr(entry.jsr) : undefined;
 
     return {
@@ -129,7 +167,7 @@ export async function readEntry(entry) {
     };
   } catch (error) {
     if (STRICT) throw error;
-    console.warn(`  left out, registry did not answer: ${entry.jsr ?? entry.npm} (${error.message})`);
+    console.warn(`  left out: ${entry.jsr ?? entry.npm} (${error.message})`);
 
     return null;
   }
