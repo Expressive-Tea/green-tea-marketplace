@@ -73,6 +73,11 @@ export function isEsmOnly({ type, main, exports }) {
   return !cjs(main) && !cjs(exports);
 }
 
+/** JSR's version list minus yanked ones — the registry hides those, so the listing must too. */
+export function publishedVersions(items) {
+  return items.filter((item) => !item.yanked).map((item) => item.version);
+}
+
 /** npm stores this literal string when a package ships no README. */
 export function npmReadme(packument) {
   const readme = packument.readme ?? '';
@@ -126,7 +131,7 @@ export async function readJsr(name) {
   const info = await getJson(base, `jsr ${name}`);
   const listing = await getJson(`${base}/versions`, `jsr ${name} versions`);
   // `items`, not `latestVersion`. See newestVersion.
-  const versions = (listing.items ?? []).map((item) => item.version);
+  const versions = publishedVersions(listing.items ?? []);
   const newest = newestVersion(versions);
   const dependencies = newest ? await getJson(`${base}/versions/${newest}/dependencies`, `jsr ${name} deps`) : [];
   const meta = newest ? await getJson(`${base}/versions/${newest}`, `jsr ${name} ${newest}`) : {};

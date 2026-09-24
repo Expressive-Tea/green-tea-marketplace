@@ -37,10 +37,35 @@ export function cleanReadme(html, base) {
     allowedStyles: {
       '*': { color: [HEX], 'background-color': [HEX], 'overflow-x': [/^auto$/] },
     },
+    // Only the classes shiki writes, spelled out. A README that could use any class could borrow the
+    // site's own (`card__link::after` is a full-page overlay) and draw over the page that way.
+    // `github-dark` is Astro's default theme; change it here if astro.config.mjs picks another.
+    allowedClasses: {
+      pre: ['astro-code', 'github-dark'],
+      code: [/^language-[a-z0-9+#-]+$/],
+      span: ['line'],
+    },
     allowedSchemes: ['http', 'https', 'mailto'],
     transformTags: {
       a: (tagName, attribs) => ({ tagName, attribs: rebase(attribs, 'href', base) }),
       img: (tagName, attribs) => ({ tagName, attribs: rebase(attribs, 'src', base) }),
+      // `srcset` is a comma-separated list of "url descriptor" pairs; only the url moves.
+      source: (tagName, attribs) =>
+        'srcset' in attribs
+          ? {
+              tagName,
+              attribs: {
+                ...attribs,
+                srcset: attribs.srcset
+                  .split(',')
+                  .map((candidate) => {
+                    const [url, ...descriptor] = candidate.trim().split(/\s+/);
+                    return [absolute(url, base), ...descriptor].join(' ');
+                  })
+                  .join(', '),
+              },
+            }
+          : { tagName, attribs },
     },
   });
 }
