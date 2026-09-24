@@ -7,7 +7,11 @@
 // plugin node that
 // provides a token an app step already provides wins in `topoSort`/`subgraphFor` (src/graph.ts,
 // `producedBy.set`, last one in), and the app's step drops out of the graph with no error.
-// Verified 2026-09-24. Only duplicate node *names* are a boot error. Ordering is the claim.
+// Verified 2026-09-24. Only duplicate node *names* are a boot error.
+//
+// The claim is execution order derived from needs/provides, and nothing more. Registration order
+// is NOT irrelevant: with two producers of one token, the one registered last wins, so never
+// write "no need to register X first".
 const points = [
   {
     title: 'One object',
@@ -19,7 +23,7 @@ const points = [
   },
   {
     title: 'The graph picks the order',
-    body: 'Say what your plugin needs and what it provides, and green-tea works out where it runs. There&rsquo;s no middleware order to document and no &ldquo;register this one first&rdquo; in your README.',
+    body: 'Say what your plugin needs and what it provides, and green-tea works out where it runs.',
   },
 ];
 ---
