@@ -21,6 +21,14 @@ const plugins = (await getCollection('plugins'))
     internal: (data.jsr ?? data.npm ?? '').startsWith('@green-tea/'),
   }))
   .sort((a, b) => a.name.localeCompare(b.name));
+// "Add your plugin" opens GitHub's new-file editor inside this repo with an example already
+// filled in, so a contributor edits a few lines and opens the pull request from there.
+const EXAMPLE = `jsr: "@your-scope/green-tea-your-plugin"   # recommended. Or npm: green-tea-your-plugin (ESM only)
+repo: https://github.com/you/green-tea-your-plugin
+description: "One sentence, 20 to 200 characters."
+`;
+const ADD_URL = `https://github.com/Expressive-Tea/green-tea-marketplace/new/main/src/content/plugins?filename=green-tea-your-plugin.yaml&value=${encodeURIComponent(EXAMPLE)}`;
+const CONTRIBUTING = 'https://github.com/Expressive-Tea/green-tea-marketplace/blob/main/CONTRIBUTING.md';
 ---
 
 <html lang="en">
@@ -29,7 +37,7 @@ const plugins = (await getCollection('plugins'))
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" href="/plugins/favicon.svg" type="image/svg+xml" />
     <title>Green Tea. plugins</title>
-    <meta name="description" content="Plugins for green-tea, with the runtimes each one declares." />
+    <meta name="description" content="List your green-tea plugin. JSR recommended; npm works too, as long as it is ESM only." />
     <link rel="canonical" href="https://green-tea.expressive-tea.io/plugins" />
   </head>
   <body>
@@ -37,51 +45,31 @@ const plugins = (await getCollection('plugins'))
 
     <main>
       <section class="hero wrap">
-        <h1>Plugins</h1>
+        <h1>Built a green-tea plugin? List it here.</h1>
         <p class="hero__lead">
-          A plugin is a named object that adds steps and providers to your graph. It imports
-          green-tea as types only, so installing one never pulls a second copy of core.
+          Publish it to JSR (our recommendation) or to npm as ESM only. Then add one small file to
+          this repo, and it shows up on the next Friday cut.
         </p>
-        <p class="requires">
-          Everything here needs <code>@green-tea/core@26.9.0-beta.2</code> or newer. That is the
-          release where a plugin became <code>&#123; name, mount &#125;</code> and
-          <code>app.boot()</code> went public; on anything older these will not mount.
+        <p class="hero__actions">
+          <a class="button" href={ADD_URL}>Add your plugin</a>
+          <a class="button button--ghost" href="#plugins">Browse plugins</a>
         </p>
       </section>
 
-      <section class="wrap">
+      <section class="wrap" id="plugins" aria-label="Plugins">
         <div class="grid">
           {plugins.map((plugin) => <PluginCard {...plugin} />)}
         </div>
       </section>
 
       <section class="contribute wrap" id="contribute">
-        <h2>Add your plugin</h2>
-        <p>
-          Fork the listing, add one file under <code>src/content/plugins/</code>, open a pull
-          request. There is no version and no runtimes field — both are read from the registry, so
-          your entry cannot go stale.
-        </p>
-
-        <pre><code>npm: green-tea-foo            # at least one of npm / jsr
-jsr: "@acme/green-tea-foo"
-repo: https://github.com/acme/green-tea-foo
-description: "One sentence, 20–200 characters."</code></pre>
-
-        <p>
-          A check runs against npm and JSR: the package has to exist, depend on
-          <code>@green-tea/core</code>, and declare at least one runtime. Then a person reads it —
-          that it really is a factory returning <code>&#123; name, mount &#125;</code>, and that its
-          README lists all four runtimes with a reason beside each one it does not support.
-        </p>
-        <p class="contribute__cadence">
-          Merged entries go live on the next <strong>Friday</strong> cut.
-        </p>
-        <p>
-          <a class="button" href="https://github.com/Expressive-Tea/green-tea-marketplace">
-            Open the listing on GitHub &rarr;
-          </a>
-        </p>
+        <h2>How it works</h2>
+        <ol class="steps">
+          <li>Publish to JSR, or to npm as an ESM-only package.</li>
+          <li>Open a pull request that adds one yaml file.</li>
+          <li>When it merges, it goes live the next Friday.</li>
+        </ol>
+        <p>What counts as a plugin, and what a reviewer checks, is in <a href={CONTRIBUTING}>CONTRIBUTING.md</a>.</p>
       </section>
     </main>
 

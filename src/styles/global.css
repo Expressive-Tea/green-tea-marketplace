@@ -419,3 +419,10 @@ main {
   .plugin__body { grid-template-columns: 1fr; }
   .versions { order: -1; }
 }
+
+.hero__actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem; }
+.button--ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+.button--ghost:hover { border-color: var(--matcha); }
+.steps { padding-left: 1.25rem; }
+.steps li { padding-block: 0.25rem; }
+.contribute a:not(.button) { color: var(--matcha); }
