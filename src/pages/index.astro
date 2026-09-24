@@ -3,6 +3,11 @@ import { getCollection } from 'astro:content';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import PluginCard from '../components/PluginCard.astro';
+import Hero from '../components/sections/Hero.astro';
+import WhatIsAPlugin from '../components/sections/WhatIsAPlugin.astro';
+import WhyHere from '../components/sections/WhyHere.astro';
+import HowItWorks from '../components/sections/HowItWorks.astro';
+import FrontRow from '../components/sections/FrontRow.astro';
 import '../styles/global.css';
 
 // Read at build time by the collection's loader (scripts/loader.mjs) — this site is static files
@@ -21,14 +26,6 @@ const plugins = (await getCollection('plugins'))
     internal: (data.jsr ?? data.npm ?? '').startsWith('@green-tea/'),
   }))
   .sort((a, b) => a.name.localeCompare(b.name));
-// "Add your plugin" opens GitHub's new-file editor inside this repo with an example already
-// filled in, so a contributor edits a few lines and opens the pull request from there.
-const EXAMPLE = `jsr: "@your-scope/green-tea-your-plugin"   # recommended. Or npm: green-tea-your-plugin (ESM only)
-repo: https://github.com/you/green-tea-your-plugin
-description: "One sentence, 20 to 200 characters."
-`;
-const ADD_URL = `https://github.com/Expressive-Tea/green-tea-marketplace/new/main/src/content/plugins?filename=green-tea-your-plugin.yaml&value=${encodeURIComponent(EXAMPLE)}`;
-const CONTRIBUTING = 'https://github.com/Expressive-Tea/green-tea-marketplace/blob/main/CONTRIBUTING.md';
 ---
 
 <html lang="en">
@@ -44,33 +41,21 @@ const CONTRIBUTING = 'https://github.com/Expressive-Tea/green-tea-marketplace/bl
     <Header />
 
     <main>
-      <section class="hero wrap">
-        <h1>Built a green-tea plugin? List it here.</h1>
-        <p class="hero__lead">
-          Publish it to JSR (our recommendation) or to npm as ESM only. Then add one small file to
-          this repo, and it shows up on the next Friday cut.
-        </p>
-        <p class="hero__actions">
-          <a class="button" href={ADD_URL}>Add your plugin</a>
-          <a class="button button--ghost" href="#plugins">Browse plugins</a>
-        </p>
-      </section>
+      <Hero />
+      <WhatIsAPlugin />
 
-      <section class="wrap" id="plugins" aria-label="Plugins">
+      <section class="section wrap" id="plugins">
+        <p class="kicker">The listing</p>
+        <h2>Official plugins, and room for yours</h2>
+        <p class="section__lead">Three to start. The version and runtimes on each card come straight from the registry.</p>
         <div class="grid">
           {plugins.map((plugin) => <PluginCard {...plugin} />)}
         </div>
       </section>
 
-      <section class="contribute wrap" id="contribute">
-        <h2>How it works</h2>
-        <ol class="steps">
-          <li>Publish to JSR, or to npm as an ESM-only package.</li>
-          <li>Open a pull request that adds one yaml file.</li>
-          <li>When it merges, it goes live the next Friday.</li>
-        </ol>
-        <p>What counts as a plugin, and what a reviewer checks, is in <a href={CONTRIBUTING}>CONTRIBUTING.md</a>.</p>
-      </section>
+      <WhyHere />
+      <HowItWorks />
+      <FrontRow />
     </main>
 
     <Footer />

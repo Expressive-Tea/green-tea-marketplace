@@ -1,0 +1,47 @@
+---
+import { ADD_URL, CONTRIBUTING_URL } from '../../links';
+---
+
+<section class="section wrap">
+  <div class="front">
+    <h2>The listing is new. The first plugins get the front row.</h2>
+    <p>Every plugin here today is one of ours. The first community entries are the ones people will see first.</p>
+    <p class="front__actions">
+      <a class="button button--solid" href={ADD_URL}>Add your plugin</a>
+      <a class="button button--ghost" href={CONTRIBUTING_URL}>Read CONTRIBUTING.md</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .front {
+    text-align: center;
+    padding: clamp(2.5rem, 6vw, 4rem) clamp(1.5rem, 5vw, 3rem);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background:
+      radial-gradient(ellipse at top, rgba(95, 184, 138, 0.14), transparent 60%),
+      radial-gradient(ellipse at bottom, rgba(124, 108, 240, 0.1), transparent 60%),
+      var(--panel);
+  }
+
+  .front h2 {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    margin: 0 auto 14px;
+    max-width: 24ch;
+  }
+
+  .front p {
+    color: var(--dim);
+    margin: 0 auto;
+    max-width: 56ch;
+  }
+
+  .front__actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1.75rem !important;
+  }
+</style>

@@ -72,75 +72,34 @@ main {
   display: block;
 }
 
-.hero {
-  padding-top: clamp(3rem, 7vw, 5rem);
+/* Each home section brings its own layout; this is the rhythm they share. */
+.section {
+  padding-top: clamp(3.5rem, 8vw, 5.5rem);
 }
 
-.hero h1 {
-  font-size: clamp(2.2rem, 6vw, 3.4rem);
-  margin: 0 0 16px;
-  letter-spacing: -0.01em;
+.section h2 {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  margin: 0 0 24px;
 }
 
-.hero__lead {
+.section__lead {
   color: var(--dim);
+  margin: -12px 0 24px;
   max-width: 62ch;
-  margin: 0;
-  font-size: 1.05rem;
 }
 
-/* Full container width, like every other section, so its left edge lines up with the cards above.
-   The reading measure is capped on the prose instead — the same split the hero already uses,
-   where `.hero__lead` is narrow inside a full-width `.hero`. Capping the section itself centred it
-   at a narrower width and knocked the whole block out of alignment. */
-.contribute {
-  padding-top: clamp(3rem, 7vw, 4.5rem);
+/* Keeps a hyphenated name like green-tea on one line in a large heading. */
+.nowrap {
+  white-space: nowrap;
 }
 
-.contribute h2 {
-  font-size: clamp(1.5rem, 4vw, 2rem);
-  margin: 0 0 16px;
-}
-
-.contribute p {
-  color: var(--dim);
-  margin: 0 0 16px;
-  max-width: 68ch;
-}
-
-/* The snippet is short and fixed, so it sizes to the prose rather than stretching to the grid. */
-.contribute pre {
-  max-width: 68ch;
-}
-
-.contribute code {
-  font-family: var(--font-mono);
-  font-size: 0.9em;
-  color: var(--ink);
-}
-
-.contribute pre {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 16px 18px;
-  overflow-x: auto;
-  margin: 0 0 20px;
-}
-
-.contribute pre code {
-  font-size: 0.82rem;
-  line-height: 1.7;
-  color: var(--ink);
-}
-
-.contribute__cadence {
-  border-left: 3px solid var(--matcha);
-  padding-left: 14px;
-}
-
-.contribute__cadence strong {
+.kicker {
+  margin: 0 0 8px;
   color: var(--matcha);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .button {
@@ -157,6 +116,18 @@ main {
 
 .button:hover {
   border-color: var(--matcha);
+}
+
+/* The one action the page is for. */
+.button--solid {
+  background: var(--matcha);
+  border-color: var(--matcha);
+  color: var(--base);
+}
+
+.button--solid:hover {
+  background: var(--matcha-deep);
+  border-color: var(--matcha-deep);
 }
 
 /* The one thing a reader has to know before installing anything here. */
@@ -420,9 +391,5 @@ main {
   .versions { order: -1; }
 }
 
-.hero__actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem; }
 .button--ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); }
 .button--ghost:hover { border-color: var(--matcha); }
-.steps { padding-left: 1.25rem; }
-.steps li { padding-block: 0.25rem; }
-.contribute a:not(.button) { color: var(--matcha); }
