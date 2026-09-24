@@ -2,10 +2,12 @@
 // Every claim here is checked against core: the shape and the three-method API are
 // `Plugin`/`PluginApi` in src/plugin.ts, and `mountPlugin` hands over nothing else.
 //
-// Do NOT claim a plugin cannot replace or remove an app's step. It can: a plugin node that
+// Make no isolation claims here at all. A plugin's step gets the live request context and can
+// overwrite keys in it (see mountPlugin's comment), and a plugin node can replace an app step: a
+// plugin node that
 // provides a token an app step already provides wins in `topoSort`/`subgraphFor` (src/graph.ts,
 // `producedBy.set`, last one in), and the app's step drops out of the graph with no error.
-// Verified 2026-09-24. Only duplicate node *names* are a boot error.
+// Verified 2026-09-24. Only duplicate node *names* are a boot error. Ordering is the claim.
 const points = [
   {
     title: 'One object',
@@ -17,7 +19,7 @@ const points = [
   },
   {
     title: 'The graph picks the order',
-    body: 'Say what your plugin needs and what it provides, and green-tea decides where it runs. The plugin never gets your app: no container, no modules, no <code>emit</code>. Only the three functions above.',
+    body: 'Say what your plugin needs and what it provides, and green-tea works out where it runs. There&rsquo;s no middleware order to document and no &ldquo;register this one first&rdquo; in your README.',
   },
 ];
 ---
