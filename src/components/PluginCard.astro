@@ -1,13 +1,8 @@
 ---
-import { RUNTIMES } from '../../scripts/registry.mjs';
-// Brand marks from simple-icons (CC0), vendored rather than pulled at build time. `?raw` inlines
-// them so each is one path in the HTML instead of four more requests.
-import node from '../icons/nodedotjs.svg?raw';
-import deno from '../icons/deno.svg?raw';
-import bun from '../icons/bun.svg?raw';
-import workerd from '../icons/cloudflareworkers.svg?raw';
+import Runtimes from './Runtimes.astro';
 
 interface Props {
+  slug: string;
   name: string;
   description: string;
   repo: string;
@@ -18,52 +13,14 @@ interface Props {
   internal: boolean;
 }
 
-const { name, description, repo, version, npm, jsr, runtimes, internal } = Astro.props;
-
-const ICONS: Record<string, string> = { node, deno, bun, workerd };
-const LABELS: Record<string, string> = {
-  node: 'Node.js',
-  deno: 'Deno',
-  bun: 'Bun',
-  workerd: 'workerd (Cloudflare Workers)',
-};
-
-// All four are always shown. Colour means the package declares it runs there; dim grey means it
-// declared otherwise, or said nothing — the tooltip is what separates those two, because at a
-// glance they are the same fact: you cannot use it there.
-const runs = (runtime: string) => runtimes.includes(runtime);
-const tooltip = (runtime: string) => {
-  if (runs(runtime)) return `Runs on ${LABELS[runtime]}`;
-
-  return internal
-    ? `Does not run on ${LABELS[runtime]} — see the README for why`
-    : `${LABELS[runtime]} not declared by this package`;
-};
+const { slug, name, description, repo, version, npm, jsr, runtimes, internal } = Astro.props;
 ---
 
 <article class="card">
   <span class="version">{version}</span>
-  <h2>{name}</h2>
+  <h2><a class="card__link" href={`/plugins/${slug}/`}>{name}</a></h2>
 
-  <ul class="runtimes">
-    {
-      RUNTIMES.map((runtime) => (
-        // `data-tip` rather than `title`: the native tooltip waits about a second, cannot be
-        // styled, and — the reason it did not work at all here — loses to a `<title>` inside the
-        // SVG. The marks now carry no `<title>`, and the label lives on this element for both the
-        // tooltip and the screen reader. `tabindex` so it is reachable without a mouse.
-        <li
-          class={runs(runtime) ? 'yes' : 'no'}
-          data-tip={tooltip(runtime)}
-          role="img"
-          aria-label={tooltip(runtime)}
-          tabindex="0"
-        >
-          <Fragment set:html={ICONS[runtime]} />
-        </li>
-      ))
-    }
-  </ul>
+  <Runtimes runtimes={runtimes} internal={internal} />
 
   <p>{description}</p>
 

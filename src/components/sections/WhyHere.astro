@@ -1,0 +1,55 @@
+---
+// Nothing here promises traffic or reach. Each line is something the listing already does.
+const reasons = [
+  { title: 'A page of its own', body: 'Your README, every published version and an install command people can copy.' },
+  { title: 'Runtimes read, not typed', body: 'Each card shows where your plugin runs, taken from what the package declares.' },
+  {
+    title: "It doesn't go stale",
+    body: 'Your entry has no version in it. Each rebuild of the listing asks the registry again, so your card picks up a new release without you touching the entry.',
+  },
+  { title: 'Read by a person', body: 'Someone who works on green-tea reads each entry before it is listed.' },
+];
+---
+
+<section class="section wrap">
+  <p class="kicker">Why here</p>
+  <h2>Why list it here</h2>
+
+  <dl class="reasons">
+    {
+      reasons.map((reason) => (
+        <div class="reason">
+          <dt>{reason.title}</dt>
+          <dd>{reason.body}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>
+
+<style>
+  .reasons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 28px 36px;
+    margin: 0;
+  }
+
+  .reason {
+    border-left: 2px solid var(--matcha);
+    padding-left: 16px;
+  }
+
+  .reason dt {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 6px;
+  }
+
+  .reason dd {
+    margin: 0;
+    color: var(--dim);
+    line-height: 1.65;
+  }
+</style>

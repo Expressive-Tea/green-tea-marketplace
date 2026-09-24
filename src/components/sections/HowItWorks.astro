@@ -1,0 +1,89 @@
+---
+import { Code } from 'astro:components';
+import { EXAMPLE_ENTRY } from '../../links';
+
+// The editor gets the comment that explains npm; the card is too narrow for it.
+const shown = EXAMPLE_ENTRY.replace(/[ \t]+#.*$/m, '').trim();
+---
+
+<section class="section wrap" id="contribute">
+  <p class="kicker">How it works</p>
+  <h2>Three steps</h2>
+
+  <ol class="steps">
+    <li class="step">
+      <h3>Publish</h3>
+      <p>Put it on JSR, or on npm as an ESM-only package.</p>
+    </li>
+    <li class="step step--wide">
+      <h3>Add one file</h3>
+      <p>Open a pull request that adds one yaml file.</p>
+      <Code code={shown} lang="yaml" theme="github-dark" />
+    </li>
+    <li class="step">
+      <h3>Go live</h3>
+      <p>Once it merges, it is out on the next Friday cut.</p>
+    </li>
+  </ol>
+</section>
+
+<style>
+  .steps {
+    list-style: none;
+    counter-reset: step;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 2fr) 1fr;
+    gap: 20px;
+  }
+
+  .step {
+    counter-increment: step;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 22px 24px;
+    min-width: 0;
+  }
+
+  .step::before {
+    content: counter(step);
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(95, 184, 138, 0.12);
+    border: 1px solid rgba(95, 184, 138, 0.35);
+    color: var(--matcha);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  .step h3 {
+    margin: 12px 0 6px;
+    font-size: 1.1rem;
+  }
+
+  .step p {
+    margin: 0;
+    color: var(--dim);
+  }
+
+  .step :global(pre) {
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    font-size: 0.76rem;
+    line-height: 1.6;
+    overflow-x: auto;
+  }
+
+  @media (max-width: 900px) {
+    .steps {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

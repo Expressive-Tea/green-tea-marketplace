@@ -48,7 +48,41 @@ function compare(a, b) {
  * `@green-tea/core`, which has two published versions and `"latest": null`.
  */
 export function newestVersion(versions) {
-  return [...versions].sort(compare).pop();
+  return byNewest(versions)[0];
+}
+
+/** Versions sorted newest first. */
+export function byNewest(versions) {
+  return [...versions].sort(compare).reverse();
+}
+
+/**
+ * ESM only, with no CJS way in at all — dual packages included, because green-tea is ESM end to
+ * end and a `require` path is what breaks first when the Node floor moves.
+ */
+export function isEsmOnly({ type, main, exports }) {
+  if (type !== 'module') return false;
+  const cjs = (node, key) => {
+    if (key === 'require') return true;
+    if (typeof node === 'string') return node.endsWith('.cjs');
+    if (node && typeof node === 'object') return Object.entries(node).some(([k, v]) => cjs(v, k));
+
+    return false;
+  };
+
+  return !cjs(main) && !cjs(exports);
+}
+
+/** JSR's version list minus yanked ones — the registry hides those, so the listing must too. */
+export function publishedVersions(items) {
+  return items.filter((item) => !item.yanked).map((item) => item.version);
+}
+
+/** npm stores this literal string when a package ships no README. */
+export function npmReadme(packument) {
+  const readme = packument.readme ?? '';
+
+  return readme.startsWith('ERROR: No README data found') ? '' : readme;
 }
 
 async function getJson(url, what) {
@@ -56,6 +90,13 @@ async function getJson(url, what) {
   if (!response.ok) throw new Error(`${what}: ${url} answered ${response.status}`);
 
   return response.json();
+}
+
+async function getText(url, what) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`${what}: ${url} answered ${response.status}`);
+
+  return response.text();
 }
 
 /** The npm packument, reduced to what validation and the card need. */
@@ -76,6 +117,10 @@ export async function readNpm(name) {
     devDependencies: version.devDependencies ?? {},
     dependencies: version.dependencies ?? {},
     peerDependencies: version.peerDependencies ?? {},
+    type: version.type,
+    main: version.main,
+    exports: version.exports,
+    readme: npmReadme(packument),
   };
 }
 
@@ -86,11 +131,15 @@ export async function readJsr(name) {
   const info = await getJson(base, `jsr ${name}`);
   const listing = await getJson(`${base}/versions`, `jsr ${name} versions`);
   // `items`, not `latestVersion`. See newestVersion.
-  const versions = (listing.items ?? []).map((item) => item.version);
+  const versions = publishedVersions(listing.items ?? []);
   const newest = newestVersion(versions);
   const dependencies = newest ? await getJson(`${base}/versions/${newest}/dependencies`, `jsr ${name} deps`) : [];
+  const meta = newest ? await getJson(`${base}/versions/${newest}`, `jsr ${name} ${newest}`) : {};
+  const readme = meta.readmePath
+    ? await getText(`https://jsr.io/${name}/${newest}${meta.readmePath}`, `jsr ${name} readme`)
+    : '';
 
-  return { versions, newest, runtimeCompat: info.runtimeCompat ?? {}, dependencies };
+  return { versions, newest, runtimeCompat: info.runtimeCompat ?? {}, dependencies, readme };
 }
 
 /**
@@ -109,7 +158,7 @@ export function declaredRuntimes({ engines, runtimeCompat }) {
 }
 
 /**
- * Everything one card needs, live.
+ * Everything a card and a plugin page need, live.
  *
  * Under `CI` a registry that does not answer throws and fails the build, which is the rule that
  * stops a stale or half-empty listing reaching production. Off CI it warns and returns `null`, and
@@ -118,18 +167,35 @@ export function declaredRuntimes({ engines, runtimeCompat }) {
 export async function readEntry(entry) {
   try {
     const npm = entry.npm ? await readNpm(entry.npm) : undefined;
+    if (npm && !isEsmOnly(npm)) {
+      throw new Error(
+        `npm ${entry.npm}@${npm.newest} is not ESM only (type: ${npm.type ?? 'unset'}, main: ${npm.main ?? '-'}, exports: ${JSON.stringify(npm.exports ?? null)})`,
+      );
+    }
     const jsr = entry.jsr ? await readJsr(entry.jsr) : undefined;
 
+    // JSR is the recommendation, so it is the source of the page whenever the entry declares it.
+    const from = jsr ? { registry: 'jsr', pkg: entry.jsr, info: jsr } : { registry: 'npm', pkg: entry.npm, info: npm };
+    const version = from.info.newest;
+
     return {
-      version: (jsr ?? npm).newest,
+      registry: from.registry,
+      pkg: from.pkg,
+      version,
+      versions: byNewest(from.info.versions),
       // npm's `engines` is the richer of the two — JSR's `runtimeCompat` is empty far more often,
       // including on `@green-tea/core` itself — so it wins when both exist.
       runtimes: declaredRuntimes({ engines: npm?.engines, runtimeCompat: jsr?.runtimeCompat }),
-      live: true,
+      readme: from.info.readme,
+      // Where the README's relative links point: the files of this exact published version.
+      readmeBase:
+        from.registry === 'jsr'
+          ? `https://jsr.io/${from.pkg}/${version}/`
+          : `https://cdn.jsdelivr.net/npm/${from.pkg}@${version}/`,
     };
   } catch (error) {
     if (STRICT) throw error;
-    console.warn(`  left out, registry did not answer: ${entry.jsr ?? entry.npm} (${error.message})`);
+    console.warn(`  left out: ${entry.jsr ?? entry.npm} (${error.message})`);
 
     return null;
   }

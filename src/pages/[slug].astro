@@ -1,0 +1,94 @@
+---
+import { getCollection, render } from 'astro:content';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Runtimes from '../components/Runtimes.astro';
+import '../styles/global.css';
+
+export async function getStaticPaths() {
+  return (await getCollection('plugins')).map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+const hasReadme = Boolean(entry.rendered?.html);
+const internal = data.pkg.startsWith('@green-tea/');
+const install = data.registry === 'jsr' ? `npx jsr add ${data.pkg}` : `npm i ${data.pkg}`;
+const versionUrl = (v: string) =>
+  data.registry === 'jsr' ? `https://jsr.io/${data.pkg}@${v}` : `https://www.npmjs.com/package/${data.pkg}/v/${v}`;
+const registryUrl = data.registry === 'jsr' ? `https://jsr.io/${data.pkg}` : `https://www.npmjs.com/package/${data.pkg}`;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" href="/plugins/favicon.svg" type="image/svg+xml" />
+    <title>{data.pkg} · Green Tea. plugins</title>
+    <meta name="description" content={data.description} />
+    <link rel="canonical" href={`https://green-tea.expressive-tea.io/plugins/${entry.id}/`} />
+  </head>
+  <body>
+    <Header />
+
+    <main class="wrap plugin">
+      <header class="plugin__head">
+        <p class="plugin__back"><a href="/plugins/">&larr; All plugins</a></p>
+        <h1>{data.pkg} <span class="version">{data.version}</span></h1>
+        <p>{data.description}</p>
+        <Runtimes runtimes={data.runtimes} internal={internal} />
+
+        <div class="install">
+          <code>{install}</code>
+          <button type="button" class="button" data-copy={install} aria-live="polite">Copy</button>
+        </div>
+        <p class="requires">Needs <code>@green-tea/core@26.9.0-beta.2</code> or newer.</p>
+
+        <p class="links">
+          <a href={registryUrl}>{data.registry === 'jsr' ? 'JSR' : 'npm'}</a>
+          <a href={data.repo}>source</a>
+        </p>
+      </header>
+
+      <div class="plugin__body">
+        <article class="readme">
+          {
+            hasReadme ? (
+              <Content />
+            ) : (
+              <p>
+                This package publishes no README. <a href={registryUrl}>See it on the registry.</a>
+              </p>
+            )
+          }
+        </article>
+
+        <aside class="versions" aria-label="Versions">
+          <h2>Versions</h2>
+          <ol>
+            {
+              data.versions.map((v) => (
+                <li>
+                  <a href={versionUrl(v)}>{v}</a>
+                </li>
+              ))
+            }
+          </ol>
+        </aside>
+      </div>
+    </main>
+
+    <Footer />
+
+    <script>
+      for (const button of document.querySelectorAll<HTMLButtonElement>('[data-copy]')) {
+        button.addEventListener('click', async () => {
+          await navigator.clipboard.writeText(button.dataset.copy ?? '');
+          button.textContent = 'Copied';
+          setTimeout(() => (button.textContent = 'Copy'), 1500);
+        });
+      }
+    </script>
+  </body>
+</html>

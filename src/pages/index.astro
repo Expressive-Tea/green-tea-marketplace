@@ -1,37 +1,31 @@
 ---
 import { getCollection } from 'astro:content';
-import { readEntry } from '../../scripts/registry.mjs';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import PluginCard from '../components/PluginCard.astro';
+import Hero from '../components/sections/Hero.astro';
+import WhatIsAPlugin from '../components/sections/WhatIsAPlugin.astro';
+import WhyHere from '../components/sections/WhyHere.astro';
+import HowItWorks from '../components/sections/HowItWorks.astro';
+import FrontRow from '../components/sections/FrontRow.astro';
 import '../styles/global.css';
 
-// Read at build time, never at request time — this site is static files on cPanel. Under CI a
-// registry that does not answer fails the build; off CI that entry is left out. See
-// scripts/registry.mjs.
-const entries = await getCollection('plugins');
-const plugins = (
-  await Promise.all(
-    entries.map(async (entry) => {
-      const live = await readEntry(entry.data);
-      if (!live) return null;
-
-      return {
-        name: entry.data.jsr ?? entry.data.npm,
-        description: entry.data.description,
-        repo: entry.data.repo,
-        npm: entry.data.npm,
-        jsr: entry.data.jsr,
-        version: live.version,
-        runtimes: live.runtimes,
-        // An internal plugin could be listed on npm alone and still be ours, so check both fields.
-        internal: (entry.data.jsr ?? entry.data.npm ?? '').startsWith('@green-tea/'),
-      };
-    }),
-  )
-).filter((plugin) => plugin !== null);
-
-plugins.sort((a, b) => a.name.localeCompare(b.name));
+// Read at build time by the collection's loader (scripts/loader.mjs) — this site is static files
+// on cPanel. Under CI a registry that does not answer fails the build; off CI that entry is left out.
+const plugins = (await getCollection('plugins'))
+  .map(({ id, data }) => ({
+    slug: id,
+    name: data.pkg,
+    description: data.description,
+    repo: data.repo,
+    npm: data.npm,
+    jsr: data.jsr,
+    version: data.version,
+    runtimes: data.runtimes,
+    // An internal plugin could be listed on npm alone and still be ours, so check both fields.
+    internal: (data.jsr ?? data.npm ?? '').startsWith('@green-tea/'),
+  }))
+  .sort((a, b) => a.name.localeCompare(b.name));
 ---
 
 <html lang="en">
@@ -40,60 +34,28 @@ plugins.sort((a, b) => a.name.localeCompare(b.name));
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" href="/plugins/favicon.svg" type="image/svg+xml" />
     <title>Green Tea. plugins</title>
-    <meta name="description" content="Plugins for green-tea, with the runtimes each one declares." />
+    <meta name="description" content="List your green-tea plugin. JSR recommended; npm works too, as long as it is ESM only." />
     <link rel="canonical" href="https://green-tea.expressive-tea.io/plugins" />
   </head>
   <body>
     <Header />
 
     <main>
-      <section class="hero wrap">
-        <h1>Plugins</h1>
-        <p class="hero__lead">
-          A plugin is a named object that adds steps and providers to your graph. It imports
-          green-tea as types only, so installing one never pulls a second copy of core.
-        </p>
-        <p class="requires">
-          Everything here needs <code>@green-tea/core@26.9.0-beta.2</code> or newer. That is the
-          release where a plugin became <code>&#123; name, mount &#125;</code> and
-          <code>app.boot()</code> went public; on anything older these will not mount.
-        </p>
-      </section>
+      <Hero />
+      <WhatIsAPlugin />
 
-      <section class="wrap">
+      <section class="section wrap" id="plugins">
+        <p class="kicker">The listing</p>
+        <h2>Official plugins, and room for yours</h2>
+        <p class="section__lead">Three to start. The version and runtimes on each card come straight from the registry.</p>
         <div class="grid">
           {plugins.map((plugin) => <PluginCard {...plugin} />)}
         </div>
       </section>
 
-      <section class="contribute wrap" id="contribute">
-        <h2>Add your plugin</h2>
-        <p>
-          Fork the listing, add one file under <code>src/content/plugins/</code>, open a pull
-          request. There is no version and no runtimes field — both are read from the registry, so
-          your entry cannot go stale.
-        </p>
-
-        <pre><code>npm: green-tea-foo            # at least one of npm / jsr
-jsr: "@acme/green-tea-foo"
-repo: https://github.com/acme/green-tea-foo
-description: "One sentence, 20–200 characters."</code></pre>
-
-        <p>
-          A check runs against npm and JSR: the package has to exist, depend on
-          <code>@green-tea/core</code>, and declare at least one runtime. Then a person reads it —
-          that it really is a factory returning <code>&#123; name, mount &#125;</code>, and that its
-          README lists all four runtimes with a reason beside each one it does not support.
-        </p>
-        <p class="contribute__cadence">
-          Merged entries go live on the next <strong>Friday</strong> cut.
-        </p>
-        <p>
-          <a class="button" href="https://github.com/Expressive-Tea/green-tea-marketplace">
-            Open the listing on GitHub &rarr;
-          </a>
-        </p>
-      </section>
+      <WhyHere />
+      <HowItWorks />
+      <FrontRow />
     </main>
 
     <Footer />
