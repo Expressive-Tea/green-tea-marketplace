@@ -1,0 +1,42 @@
+name: Promote → GitHub
+
+# Runs on Gitea only, and mirrors two branches to the public GitHub repository, nothing else:
+#
+#   main     → GitHub main      what gets built and deployed
+#   develop  → GitHub contrib   what outside contributors fork from and open pull requests against
+#
+# Feature branches stay private to Gitea, which is why this is a job and not Gitea's push-mirror:
+# a mirror would publish every branch.
+#
+# Neither push is forced. For `contrib` that is the guard, not a limitation: the push is refused
+# exactly when `contrib` holds external merges that have not been carried into `develop` yet.
+# Carry them, and the next develop push fast-forwards. This is the same flow as core's promote.yml.
+#
+# No tags are mirrored. This site has no release tags; a deploy is the Friday cut from `main`.
+
+on:
+  push:
+    branches: [main, develop]
+
+jobs:
+  push-github:
+    if: ${{ github.server_url != 'https://github.com' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history for a clean push
+      - name: Push to GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GH_PROMOTE_TOKEN }}
+        run: |
+          case "$GITHUB_REF_NAME" in
+            main)    target=main ;;
+            develop) target=contrib ;;
+            *) echo "::error::promote runs for main and develop only, got '$GITHUB_REF_NAME'"; exit 1 ;;
+          esac
+          git remote add github "https://x-access-token:${GH_TOKEN}@github.com/Expressive-Tea/green-tea-marketplace.git"
+          if ! git push github "HEAD:refs/heads/${target}"; then
+            echo "::error::GitHub ${target} has commits that ${GITHUB_REF_NAME} does not. For contrib that means external merges not yet carried into develop — carry them; never force this push."
+            exit 1
+          fi
