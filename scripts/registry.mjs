@@ -87,6 +87,13 @@ async function getJson(url, what) {
   return response.json();
 }
 
+async function getText(url, what) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`${what}: ${url} answered ${response.status}`);
+
+  return response.text();
+}
+
 /** The npm packument, reduced to what validation and the card need. */
 export async function readNpm(name) {
   const packument = await getJson(`https://registry.npmjs.org/${name.replace('/', '%2f')}`, `npm ${name}`);
@@ -122,8 +129,12 @@ export async function readJsr(name) {
   const versions = (listing.items ?? []).map((item) => item.version);
   const newest = newestVersion(versions);
   const dependencies = newest ? await getJson(`${base}/versions/${newest}/dependencies`, `jsr ${name} deps`) : [];
+  const meta = newest ? await getJson(`${base}/versions/${newest}`, `jsr ${name} ${newest}`) : {};
+  const readme = meta.readmePath
+    ? await getText(`https://jsr.io/${name}/${newest}${meta.readmePath}`, `jsr ${name} readme`)
+    : '';
 
-  return { versions, newest, runtimeCompat: info.runtimeCompat ?? {}, dependencies };
+  return { versions, newest, runtimeCompat: info.runtimeCompat ?? {}, dependencies, readme };
 }
 
 /**
@@ -142,7 +153,7 @@ export function declaredRuntimes({ engines, runtimeCompat }) {
 }
 
 /**
- * Everything one card needs, live.
+ * Everything a card and a plugin page need, live.
  *
  * Under `CI` a registry that does not answer throws and fails the build, which is the rule that
  * stops a stale or half-empty listing reaching production. Off CI it warns and returns `null`, and
@@ -158,12 +169,24 @@ export async function readEntry(entry) {
     }
     const jsr = entry.jsr ? await readJsr(entry.jsr) : undefined;
 
+    // JSR is the recommendation, so it is the source of the page whenever the entry declares it.
+    const from = jsr ? { registry: 'jsr', pkg: entry.jsr, info: jsr } : { registry: 'npm', pkg: entry.npm, info: npm };
+    const version = from.info.newest;
+
     return {
-      version: (jsr ?? npm).newest,
+      registry: from.registry,
+      pkg: from.pkg,
+      version,
+      versions: byNewest(from.info.versions),
       // npm's `engines` is the richer of the two — JSR's `runtimeCompat` is empty far more often,
       // including on `@green-tea/core` itself — so it wins when both exist.
       runtimes: declaredRuntimes({ engines: npm?.engines, runtimeCompat: jsr?.runtimeCompat }),
-      live: true,
+      readme: from.info.readme,
+      // Where the README's relative links point: the files of this exact published version.
+      readmeBase:
+        from.registry === 'jsr'
+          ? `https://jsr.io/${from.pkg}/${version}/`
+          : `https://cdn.jsdelivr.net/npm/${from.pkg}@${version}/`,
     };
   } catch (error) {
     if (STRICT) throw error;

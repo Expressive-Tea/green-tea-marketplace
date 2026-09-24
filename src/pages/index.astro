@@ -1,37 +1,26 @@
 ---
 import { getCollection } from 'astro:content';
-import { readEntry } from '../../scripts/registry.mjs';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import PluginCard from '../components/PluginCard.astro';
 import '../styles/global.css';
 
-// Read at build time, never at request time — this site is static files on cPanel. Under CI a
-// registry that does not answer fails the build; off CI that entry is left out. See
-// scripts/registry.mjs.
-const entries = await getCollection('plugins');
-const plugins = (
-  await Promise.all(
-    entries.map(async (entry) => {
-      const live = await readEntry(entry.data);
-      if (!live) return null;
-
-      return {
-        name: entry.data.jsr ?? entry.data.npm,
-        description: entry.data.description,
-        repo: entry.data.repo,
-        npm: entry.data.npm,
-        jsr: entry.data.jsr,
-        version: live.version,
-        runtimes: live.runtimes,
-        // An internal plugin could be listed on npm alone and still be ours, so check both fields.
-        internal: (entry.data.jsr ?? entry.data.npm ?? '').startsWith('@green-tea/'),
-      };
-    }),
-  )
-).filter((plugin) => plugin !== null);
-
-plugins.sort((a, b) => a.name.localeCompare(b.name));
+// Read at build time by the collection's loader (scripts/loader.mjs) — this site is static files
+// on cPanel. Under CI a registry that does not answer fails the build; off CI that entry is left out.
+const plugins = (await getCollection('plugins'))
+  .map(({ id, data }) => ({
+    slug: id,
+    name: data.pkg,
+    description: data.description,
+    repo: data.repo,
+    npm: data.npm,
+    jsr: data.jsr,
+    version: data.version,
+    runtimes: data.runtimes,
+    // An internal plugin could be listed on npm alone and still be ours, so check both fields.
+    internal: (data.jsr ?? data.npm ?? '').startsWith('@green-tea/'),
+  }))
+  .sort((a, b) => a.name.localeCompare(b.name));
 ---
 
 <html lang="en">
