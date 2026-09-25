@@ -14,6 +14,7 @@ const shown = EXAMPLE_ENTRY.replace(/[ \t]+#.*$/m, '').trim();
     <li class="step">
       <h3>Publish</h3>
       <p>Put it on JSR, or on npm as an ESM-only package.</p>
+      <p class="step__hint"><code>matcha create plugin --package</code> scaffolds one.</p>
     </li>
     <li class="step step--wide">
       <h3>Add one file</h3>
@@ -69,6 +70,16 @@ const shown = EXAMPLE_ENTRY.replace(/[ \t]+#.*$/m, '').trim();
   .step p {
     margin: 0;
     color: var(--dim);
+  }
+
+  .step__hint {
+    margin-top: 10px !important;
+    font-size: 0.85rem;
+  }
+
+  .step__hint code {
+    font-family: var(--font-mono);
+    color: var(--matcha);
   }
 
   .step :global(pre) {
