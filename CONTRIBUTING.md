@@ -16,6 +16,10 @@ npm works too, as long as the package is ESM only: `"type": "module"`, no `requi
 no `.cjs` file in `main` or `exports`. Dual ESM/CJS packages are turned away. green-tea is ESM from
 end to end, and a `require` path is the first thing to break when the Node version floor moves.
 
+The quickest start is [matcha](https://github.com/Expressive-Tea/matcha), green-tea's CLI:
+`matcha create plugin --package` writes a package that already meets the ESM rule, with the
+Runtimes table the review asks for in its README.
+
 ## Add the entry
 
 Add one file, `src/content/plugins/<name>.yaml`:
