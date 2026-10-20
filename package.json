@@ -18,6 +18,6 @@
     "@astrojs/sitemap": "^3.7.3",
     "astro": "^7.1.6",
     "js-yaml": "^4.3.2",
-    "sanitize-html": "^2.17.7"
+    "sanitize-html": "^2.18.0"
   }
 }
